@@ -1,0 +1,37 @@
+import{t as s,p as R,i as K,l as J,g as Y,a as G,b as T}from"./supabase.DgWUCb1c.js";import{c as W,d as Z}from"./platform.DEa9KiLC.js";const C=document.getElementById("review-form");if(C){const v=document.getElementById("review-list"),p=document.getElementById("review-summary"),g=document.getElementById("review-name"),o=document.getElementById("review-body"),S=document.getElementById("review-count"),y=document.getElementById("review-status"),f=document.getElementById("review-submit"),d=document.getElementById("review-stars"),q=document.getElementById("review-rating-label"),h=document.getElementById("review-more"),k=document.getElementById("review-platform"),M="starfall-site/comment-key/v1",B="starfall-site/comment-liked/v1",m=8;let i=[],w=0,$="latest",b="all",l=m,E="other";const x=(()=>{try{const e=localStorage.getItem(M);if(e&&e.length>=8)return e;const t=crypto.randomUUID();return localStorage.setItem(M,t),t}catch{return`anon-${crypto.randomUUID()}`}})(),L=(()=>{try{return new Set(JSON.parse(localStorage.getItem(B)??"[]"))}catch{return new Set}})(),I=e=>e.replace(/[&<>"']/g,t=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"})[t]??t),A=(e,t="")=>{const a=Math.round(e??0);return`<span class="${t}">${[1,2,3,4,5].map(r=>r<=a?"★":'<span class="off">★</span>').join("")}</span>`},H=e=>{let t=0;for(const a of e)t=(t*31+a.codePointAt(0))%360;return t},N=e=>{const t=(new Date(e).getTime()-Date.now())/1e3;if(Math.abs(t)<60)return s("刚刚");const a=new Intl.RelativeTimeFormat(T(),{numeric:"auto"});return Math.abs(t)<3600?a.format(Math.round(t/60),"minute"):Math.abs(t)<86400?a.format(Math.round(t/3600),"hour"):Math.abs(t)<2592e3?a.format(Math.round(t/86400),"day"):new Intl.DateTimeFormat(T(),{year:"numeric",month:"short",day:"numeric"}).format(new Date(e))},O=e=>e==="macos"?"macOS":e==="windows"?"Windows":e==="web"?s("网页"):s("其他"),P=()=>{let e=i.slice();return b!=="all"&&(e=e.filter(t=>t.platform===b)),$==="hot"?e.sort((t,a)=>a.likes-t.likes||+new Date(a.created_at)-+new Date(t.created_at)):$==="top"&&e.sort((t,a)=>(a.rating??0)-(t.rating??0)||+new Date(a.created_at)-+new Date(t.created_at)),e},_=()=>{const e=i.filter(r=>r.rating);if(!e.length){p.innerHTML=`<div class="summary-empty"><b>${s("暂无评分")}</b><span>${i.length} ${s("条评价")}</span></div>`;return}const t=e.reduce((r,n)=>r+(n.rating??0),0)/e.length,a=[5,4,3,2,1].map(r=>({star:r,count:e.filter(n=>n.rating===r).length}));p.innerHTML=`
+        <div class="summary-top">
+          <b class="summary-score">${t.toFixed(1)}</b>
+          <div>
+            ${A(Math.round(t),"summary-stars")}
+            <em>${e.length} ${s("条评价")} · ${i.length} ${s("位飞行员参与评分")}</em>
+          </div>
+        </div>
+        <div class="summary-dist">
+          ${a.map(r=>`
+              <div class="summary-dist-row">
+                <span>${r.star}</span>
+                <i><b style="width:${e.length?r.count/e.length*100:0}%"></b></i>
+                <span>${r.count}</span>
+              </div>`).join("")}
+        </div>`},F=e=>{const t=[e.is_dev?`<span class="review-badge is-dev">${s("开发组")}</span>`:"",e.verified?`<span class="review-badge is-verified">${s("已验证飞行员")}</span>`:"",e.rating?`<span class="review-badge">${e.rating} / 5</span>`:`<span class="review-badge">${s("只留言")}</span>`].filter(Boolean).join(""),a=L.has(e.id);return`
+        <article class="review-card${e.is_dev?" is-dev":""}">
+          <div class="review-card-head">
+            <span class="review-avatar" style="--hue:${H(e.author_name)}">${I(e.author_name.slice(0,1).toUpperCase())}</span>
+            <div class="review-who">
+              <b>${I(e.author_name)}</b>
+              <div class="review-badges">${t}</div>
+            </div>
+            <time class="review-time" datetime="${e.created_at}">${N(e.created_at)}</time>
+          </div>
+          ${e.rating?`<div class="review-card-stars">${A(e.rating,"")}</div>`:""}
+          <p class="review-text">${I(e.body)}</p>
+          <div class="review-card-foot">
+            <span class="review-platform-tag"><i></i>${O(e.platform)}</span>
+            <button class="review-like${a?" is-liked":""}" type="button" data-like="${e.id}" aria-pressed="${a}" aria-label="${s("有帮助")}">
+              <svg viewBox="0 0 16 16" fill="none" aria-hidden="true">
+                <path d="M8 13.5S2.5 10.2 2.5 6.4A2.9 2.9 0 0 1 8 4.8a2.9 2.9 0 0 1 5.5 1.6c0 3.8-5.5 7.1-5.5 7.1Z" fill="currentColor" opacity=".85"/>
+              </svg>
+              <span>${e.likes}</span>
+            </button>
+          </div>
+        </article>`},u=()=>{const e=P();if(!e.length){v.innerHTML=`<div class="review-empty"><b>${s("还没有评价")}</b>${s("成为第一位留下战报的飞行员。")}</div>`,h.hidden=!0;return}v.innerHTML=e.slice(0,l).map(F).join(""),h.hidden=e.length<=l,U()},U=()=>{v.querySelectorAll("[data-like]").forEach(e=>{e.addEventListener("click",async()=>{if(e.classList.contains("is-liked"))return;const t=e.dataset.like;e.disabled=!0;try{const a=await G(t,x);L.add(t);try{localStorage.setItem(B,JSON.stringify([...L]))}catch{}const r=i.find(j=>j.id===t);r&&(r.likes=a),e.classList.add("is-liked"),e.setAttribute("aria-pressed","true");const n=e.querySelector("span");n&&(n.textContent=String(a))}catch{c(s("操作失败，请稍后再试。"),!0)}finally{e.disabled=!1}})})},c=(e,t=!1,a=!1)=>{y.textContent=e,y.classList.toggle("is-error",t),y.classList.toggle("is-ok",a)},D=e=>{w=e,d.querySelectorAll("[data-star]").forEach(t=>{const a=Number(t.dataset.star)<=e;t.classList.toggle("is-on",a),t.setAttribute("aria-checked",String(Number(t.dataset.star)===e))}),q.textContent=e?`${e} / 5`:s("可选")};d.querySelectorAll("[data-star]").forEach(e=>{e.addEventListener("click",()=>D(Number(e.dataset.star))),e.addEventListener("mouseenter",()=>{const t=Number(e.dataset.star);d.querySelectorAll("[data-star]").forEach(a=>{a.classList.toggle("is-on",Number(a.dataset.star)<=t)})})}),d.addEventListener("mouseleave",()=>{d.querySelectorAll("[data-star]").forEach(e=>{e.classList.toggle("is-on",Number(e.dataset.star)<=w)})}),o.addEventListener("input",()=>{S.textContent=`${o.value.length} / 600`}),document.querySelectorAll("[data-sort]").forEach(e=>{e.addEventListener("click",()=>{$=e.dataset.sort,document.querySelectorAll("[data-sort]").forEach(t=>{const a=t===e;t.classList.toggle("is-active",a),t.setAttribute("aria-selected",String(a))}),l=m,u()})}),k.addEventListener("change",()=>{b=k.value,l=m,u()}),h.addEventListener("click",()=>{l+=m,u()}),C.addEventListener("submit",async e=>{e.preventDefault();const t=g.value.trim(),a=o.value.trim();if(t.length<2||t.length>24){c(s("请填写 2–24 个字符的代号。"),!0),g.focus();return}if(a.length<2){c(s("请填写 2–600 个字符的评价。"),!0),o.focus();return}f.disabled=!0,f.textContent=s("发布中…"),c("");try{i=[await R({author:t,body:a,rating:w||null,platform:E,clientKey:x}),...i],l=Math.max(l,m),o.value="",S.textContent="0 / 600",D(0),_(),u(),c(s("已发布，感谢你的反馈！"),!1,!0)}catch(r){const n=String(r?.message??r);c(n.includes("RATE_LIMITED")?s("操作太频繁，请稍后再试。"):n.includes("BODY_TOO_SHORT")?s("请填写 2–600 个字符的评价。"):s("发布失败，请稍后再试。"),!0)}finally{f.disabled=!1,f.textContent=s("发布评价")}}),(async()=>{await K();try{const e=W()??await Z();E=e.os==="windows"||e.os==="macos"?e.os:"web"}catch{E="web"}try{i=await J(),_(),u()}catch{p.innerHTML=`<div class="summary-empty"><b>${s("暂无评分")}</b><span>${s("评价区暂时连不上，请稍后再试。")}</span></div>`,v.innerHTML=`<div class="review-error">${s("评价区暂时连不上，请稍后再试。")}</div>`}try{const e=await Y();e&&!g.value&&(g.value=e.display_name)}catch{}})()}
